@@ -1,0 +1,6 @@
+fastapi==0.73.0
+pony==0.7.16
+pytest==7.0.0
+uvicorn==0.15.0
+requests==2.27.1
+black==22.1.0
