@@ -11,7 +11,7 @@ db = pony.Database()
 
 class Jugador(db.Entity, JugadorMixin):
     id_jugador = pony.PrimaryKey(int, auto=True)
-    nombre = pony.Required(str)
+    nombre = pony.Required(str, unique=True)
     resultados = pony.Set("Resultado")
     partidos = pony.Set("Partido")
     equipos = pony.Set("Equipo", reverse="jugadores")
