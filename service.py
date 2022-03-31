@@ -4,10 +4,7 @@ from datos import datos
 
 @pony.db_session()
 def carga_datos():
-    ganado = Resultado(resultado=1)
-    empatado = Resultado(resultado=2)
-    perdido = Resultado(resultado=3)
-
+    
     for partido in datos:
         p = Partido()
         pony.commit()
@@ -30,29 +27,29 @@ def carga_datos():
         pony.commit()
 
         if goles_1 > goles_2:
-            e1.set_resultado(ganado)
-            e2.set_resultado(perdido)
+            e1.set_resultado(3)
+            e2.set_resultado(0)
         elif goles_2 > goles_1:
-            e1.set_resultado(perdido)
-            e2.set_resultado(ganado)
+            e1.set_resultado(0)
+            e2.set_resultado(3)
         else:
-            e1.set_resultado(empatado)
-            e2.set_resultado(empatado)
+            e1.set_resultado(1)
+            e2.set_resultado(1)
 
         for jugador in jugadores_1:
             try:
-                j = Jugador(nombre=jugador)
+                j = Jugador(nombre=jugador, resultados=[])
             except:
-                j = db.Jugador.select(lambda j: j.nombre == jugador)[:][0]
+                j = db.Jugador.select(nombre=jugador)[:][0]
                 print(j)
             e1.add_jugador(j)
             j.add_resultado(e1.resultado)
 
         for jugador in jugadores_2:
             try:
-                j = Jugador(nombre=jugador)
+                j = Jugador(nombre=jugador, resultados=[])
             except:
-                j = db.Jugador.select(lambda j: j.nombre == jugador)[:][0]
+                j = db.Jugador.select(nombre=jugador)[:][0]
                 print(j)
-            e1.add_jugador(j)
-            j.add_resultado(e1.resultado)
+            e2.add_jugador(j)
+            j.add_resultado(e2.resultado)

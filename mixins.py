@@ -10,7 +10,7 @@ class JugadorMixin(object):
         pony.commit()
 
     def add_resultado(self, resultado):
-        self.resultados.add(resultado)
+        self.resultados.append(resultado)
         pony.commit()
 
     def add_partido(self, partido):
@@ -31,11 +31,15 @@ class JugadorMixin(object):
     def get_puntos(self):
         puntos = 0
         for r in self.resultados:
-            if r.resultado == 1:
-                puntos += 3
-            elif r.resultado == 2:
-                puntos += 1
+            puntos += r
         return puntos
+
+    def get_promedio(self):
+        try:
+            return self.get_puntos()/self.get_jugados()
+        except ZeroDivisionError:
+            print("No se puede calcular el promedio de ese gil")
+            
 
 
 # Mixins para Equipo
@@ -111,7 +115,7 @@ class CanchaMixin(object):
 
 # Mixin para Resultado
 
-
+"""
 class ResultadoMixin(object):
     def set_resultado(self, resultado):
         self.resultado = resultado
@@ -124,3 +128,4 @@ class ResultadoMixin(object):
     def add_jugador(self, jugador):
         self.jugadores.add(jugador)
         pony.commit()
+"""
