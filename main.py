@@ -1,7 +1,5 @@
 from fastapi import FastAPI
-import pony.orm as pony
 from models import (
-    db,
     get_partidos,
     get_partido_by_id,
     get_lista_de_jugadores_by_partido_by_equipo,
@@ -9,6 +7,7 @@ from models import (
     get_jugadores,
     get_jugador_by_id,
 )
+
 
 app = FastAPI()
 

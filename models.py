@@ -104,6 +104,18 @@ def get_lista_de_equipos_by_partido(partido):
 
 
 @pony.db_session()
+def get_lista_de_jugadores_anotados_by_partido_id(partido_id):
+    try:
+        partido = get_partido_by_id(partido_id)
+        return partido.jugadores_anotados.select()[:]
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudieron obtener los jugadores anotados del partido solicitado",
+        )
+
+
+@pony.db_session()
 def get_lista_de_jugadores_by_partido_by_equipo(partido, equipo_numero):
     try:
         return get_lista_de_equipos_by_partido(partido)[
@@ -144,4 +156,20 @@ def get_jugador_by_id(id_jugador):
     except:
         raise HTTPException(
             status_code=500, detail="El jugador solicitado no fue encontrado"
+        )
+
+
+@pony.db_session()
+def get_lista_equipos_juntos(nombre_jugador_1, nombre_jugador_2):
+    try:
+        jugador_1 = db.Jugador.select(lambda j: j.nombre == nombre_jugador_1).first()
+        jugador_2 = db.Jugador.select(lambda j: j.nombre == nombre_jugador_2).first()
+        equipos_juntos = db.Equipo.select(
+            lambda e: jugador_1 in e.jugadores and jugador_2 in e.jugadores
+        )[:]
+        return equipos_juntos
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudieron encontrar equipos en los que hayan jugado juntos",
         )

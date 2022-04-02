@@ -1,10 +1,21 @@
 from models import *
 from datos import datos
 
+# Funcion que carga datos de archivo .py con la forma datos={
+#   "Partido 1": {
+#       "Equipo 1": {
+#           "jugadores": {},
+#           "goles": },
+#      "Equipo 2": {
+#           "jugadores": {},
+#           "goles": }
+#      }
+#    }
+
 
 @pony.db_session()
 def carga_datos():
-    
+
     for partido in datos:
         p = Partido()
         pony.commit()
@@ -44,6 +55,7 @@ def carga_datos():
                 print(j)
             e1.add_jugador(j)
             j.add_resultado(e1.resultado)
+            p.add_jugador(j)
 
         for jugador in jugadores_2:
             try:
@@ -53,3 +65,4 @@ def carga_datos():
                 print(j)
             e2.add_jugador(j)
             j.add_resultado(e2.resultado)
+            p.add_jugador(j)
