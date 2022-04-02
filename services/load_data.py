@@ -22,17 +22,17 @@ def carga_datos():
         print(partido)
 
         jugadores_1 = datos[partido]["Equipo 1"]["jugadores"]
-        print(jugadores_1)
+
         goles_1 = datos[partido]["Equipo 1"]["goles"]
-        print(goles_1)
+
         e1 = Equipo(partido=p, goles=goles_1)
         p.add_equipo(e1)
         pony.commit()
 
         jugadores_2 = datos[partido]["Equipo 2"]["jugadores"]
-        print(jugadores_2)
+
         goles_2 = datos[partido]["Equipo 2"]["goles"]
-        print(goles_2)
+
         e2 = Equipo(partido=p, goles=goles_2)
         p.add_equipo(e2)
         pony.commit()
@@ -52,17 +52,17 @@ def carga_datos():
                 j = Jugador(nombre=jugador, resultados=[])
             except:
                 j = db.Jugador.select(nombre=jugador)[:][0]
-                print(j)
+
             e1.add_jugador(j)
             j.add_resultado(e1.resultado)
-            p.add_jugador(j)
+            print(p.add_jugador(j))
 
         for jugador in jugadores_2:
             try:
                 j = Jugador(nombre=jugador, resultados=[])
             except:
                 j = db.Jugador.select(nombre=jugador)[:][0]
-                print(j)
+
             e2.add_jugador(j)
             j.add_resultado(e2.resultado)
-            p.add_jugador(j)
+            print(p.add_jugador(j))

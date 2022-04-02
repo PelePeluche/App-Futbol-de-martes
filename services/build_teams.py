@@ -73,19 +73,20 @@ def completar_matriz(df):
 
 
 def proximo_jugador(candidatos, jugadores_equipo, df):
-    valoracion = 0
+    valoracion = -1
     anotar_jugador = 0
-    for candidato in candidatos:
-        conteo = 0
-        for jugador in jugadores_equipo:
-            conteo += df.loc[candidato][jugador]
-        if conteo > valoracion:
-            valoracion = conteo
-            anotar_jugador = candidato
-    if anotar_jugador == 0:
+    if len(jugadores_equipo) == 0:
         for candidato in candidatos:
             if df.loc[candidato][candidato] > valoracion:
                 valoracion = df.loc[candidato][candidato]
+                anotar_jugador = candidato
+    else:
+        for candidato in candidatos:
+            conteo = 0
+            for jugador in jugadores_equipo:
+                conteo += df.loc[candidato][jugador]
+            if conteo > valoracion:
+                valoracion = conteo
                 anotar_jugador = candidato
     return anotar_jugador
 
@@ -109,6 +110,6 @@ def armar_equipos_voraz(partido_id, cantidad_jugadores):
         else:
             jugador_a_agregar = proximo_jugador(jugadores_anotados, equipo_2, df)
             equipo_2.append(jugador_a_agregar)
+        print(jugador_a_agregar)
         jugadores_anotados.remove(jugador_a_agregar)
-    print(equipo_1)
-    print(equipo_2)
+    return {"Equipo 1": equipo_1, "Equipo_2": equipo_2}

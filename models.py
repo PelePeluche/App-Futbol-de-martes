@@ -1,3 +1,4 @@
+from audioop import reverse
 from fastapi import HTTPException
 import pony.orm as pony
 from datetime import date
@@ -14,9 +15,15 @@ class Jugador(db.Entity, JugadorMixin):
     id_jugador = pony.PrimaryKey(int, auto=True)
     nombre = pony.Required(str, unique=True)
     resultados = pony.Optional(pony.IntArray)
-    partidos = pony.Set("Partido")
+    partidos = pony.Set("Partido", reverse="jugadores_anotados")
     equipos = pony.Set("Equipo", reverse="jugadores")
     capitan_de = pony.Set("Equipo", reverse="capitan")
+
+
+def crear_jugador(nombre_jugador):
+    jugador = Jugador(nombre=nombre_jugador)
+    pony.commit()
+    return jugador
 
 
 # Definición de clase Equipo y sus atributos
@@ -38,9 +45,15 @@ class Equipo(db.Entity, EquipoMixin):
 class Partido(db.Entity, PartidoMixin):
     id_partido = pony.PrimaryKey(int, auto=True)
     cancha = pony.Optional("Cancha")
-    jugadores_anotados = pony.Set(Jugador)
+    jugadores_anotados = pony.Set(Jugador, reverse="partidos")
     equipos = pony.Set(Equipo)
     fecha = pony.Optional(date)
+
+
+def crear_partido():
+    partido = Partido()
+    pony.commit()
+    return partido
 
 
 # Definición de clase Cancha y sus atributos
@@ -79,9 +92,7 @@ def get_partidos():
     try:
         return db.Partido.select()
     except:
-        raise HTTPException(
-            status_code=500, detail="No se puddieron encontrar partidos"
-        )
+        raise HTTPException(status_code=500, detail="No se pudieron encontrar partidos")
 
 
 @pony.db_session()
@@ -90,6 +101,16 @@ def get_partido_by_id(id_partido):
         return Partido[id_partido]
     except:
         raise HTTPException(status_code=500, detal="No existe el partido solicitado")
+
+
+@pony.db_session()
+def get_id_proximo_partido():
+    try:
+        return len(db.Partido.select())
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudo obtener el id del proximo partido"
+        )
 
 
 @pony.db_session()
@@ -153,6 +174,16 @@ def get_jugadores():
 def get_jugador_by_id(id_jugador):
     try:
         return Jugador[id_jugador]
+    except:
+        raise HTTPException(
+            status_code=500, detail="El jugador solicitado no fue encontrado"
+        )
+
+
+@pony.db_session()
+def get_jugador_by_nombre(nombre_jugador):
+    try:
+        return db.Jugador.select(lambda j: j.nombre == nombre_jugador).first()
     except:
         raise HTTPException(
             status_code=500, detail="El jugador solicitado no fue encontrado"

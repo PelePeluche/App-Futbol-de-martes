@@ -1,18 +1,25 @@
 from fastapi import FastAPI
+import pony.orm as pony
 from models import (
+    crear_partido,
+    crear_jugador,
+    get_id_proximo_partido,
     get_partidos,
     get_partido_by_id,
     get_lista_de_jugadores_by_partido_by_equipo,
     get_goles_by_partido_by_equipo,
     get_jugadores,
     get_jugador_by_id,
+    get_lista_de_jugadores_anotados_by_partido_id,
+    get_jugador_by_nombre,
 )
+from services.build_teams import armar_equipos_voraz
 
 
 app = FastAPI()
 
 
-@app.get("/partidos")
+@app.get("/partidos-jugados")
 async def listar_partidos():
     partidos = get_partidos()
     return [
@@ -33,7 +40,7 @@ async def listar_partidos():
     ]
 
 
-@app.get("/partidos/{id_partido}")
+@app.get("/partidos-jugados/{id_partido}")
 async def detalle_partido(id_partido: int):
     partido = get_partido_by_id(id_partido)
     return {
@@ -51,6 +58,40 @@ async def detalle_partido(id_partido: int):
     }
 
 
+@app.get("/proximo-partido")
+async def detalle_proximo_partido():
+    partido = get_partido_by_id(get_id_proximo_partido())
+    return {
+        "Partido": partido.id_partido,
+        "Jugadores anotados": [
+            jugador.nombre
+            for jugador in get_lista_de_jugadores_anotados_by_partido_id(
+                get_id_proximo_partido()
+            )
+        ],
+    }
+
+
+@app.post("/proximo-partido")
+async def crear_proximo_partido():
+    partido = crear_partido()
+    return partido
+
+
+@app.put("/proximo-partido")
+async def agregar_jugador(nombre_jugador):
+    with pony.db_session():
+        partido = get_partido_by_id(get_id_proximo_partido())
+        jugador = get_jugador_by_nombre(nombre_jugador)
+        partido.add_jugador(jugador)
+        return partido
+
+
+@app.get("/proximo-partido/equipos")
+async def armar_equipos_voraz_proximo_partido(cantidad_jugadores):
+    return armar_equipos_voraz(get_id_proximo_partido(), int(cantidad_jugadores))
+
+
 @app.get("/jugadores")
 async def listar_jugadores():
     jugadores = get_jugadores()
@@ -65,9 +106,15 @@ async def listar_jugadores():
     ]
 
 
-@app.get("/jugadores/{id_jugador}")
-async def detalle_jugador(id_jugador):
-    jugador = get_jugador_by_id(id_jugador)
+@app.post("/jugadores")
+async def crear_nuevo_jugador(nombre_jugador):
+    jugador = crear_jugador(nombre_jugador)
+    return jugador
+
+
+@app.get("/jugadores/{nombre_jugador}")
+async def detalle_jugador(nombre_jugador):
+    jugador = get_jugador_by_nombre(nombre_jugador)
     return {
         "Jugador": jugador.nombre,
         "Partidos jugados": jugador.get_jugados(),
