@@ -34,12 +34,28 @@ class JugadorMixin(object):
             puntos += r
         return puntos
 
+    def get_resultados(self):
+        ganados = 0
+        empatados = 0
+        perdidos = 0
+        for r in self.resultados:
+            if r == 3:
+                ganados += 1
+            elif r == 1:
+                empatados += 1
+            else:
+                perdidos += 1
+        return {
+            "ganados": ganados,
+            "empatados": empatados,
+            "perdidos": perdidos,
+        }
+
     def get_promedio(self):
         try:
-            return self.get_puntos()/self.get_jugados()
+            return self.get_puntos() / self.get_jugados()
         except ZeroDivisionError:
             print("No se puede calcular el promedio de ese gil")
-            
 
 
 # Mixins para Equipo
