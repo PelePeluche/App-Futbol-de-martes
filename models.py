@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import pony.orm as pony
 from datetime import date
 from mixins import *
@@ -53,10 +54,6 @@ class Cancha(db.Entity, CanchaMixin):
     partidos = pony.Set(Partido)
 
 
-
-
-
-
 # Definición de clase Resultado y sus atributos
 
 """
@@ -73,3 +70,68 @@ pony.set_sql_debug(True)
 # Creation of tables for the models
 db.bind("sqlite", "database.sqlite", create_db=True)
 db.generate_mapping(create_tables=True)
+
+# Funciones de acceso a BDD
+
+
+@pony.db_session()
+def get_partidos():
+    try:
+        return db.Partido.select()
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se puddieron encontrar partidos"
+        )
+
+
+@pony.db_session()
+def get_partido_by_id(id_partido):
+    try:
+        return Partido[id_partido]
+    except:
+        raise HTTPException(status_code=500, detal="No existe el partido solicitado")
+
+
+@pony.db_session()
+def get_lista_de_equipos_by_partido(partido):
+    try:
+        return partido.equipos.select()[:]
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudieron obtener los equipos del partido solicitado",
+        )
+
+
+@pony.db_session()
+def get_lista_de_jugadores_by_partido_by_equipo(partido, equipo_numero):
+    try:
+        return get_lista_de_equipos_by_partido(partido)[
+            equipo_numero - 1
+        ].jugadores.select()
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudieron obtener los jugadores del equipo solicitado",
+        )
+
+
+@pony.db_session()
+def get_goles_by_partido_by_equipo(partido, equipo_numero):
+    try:
+        return get_lista_de_equipos_by_partido(partido)[equipo_numero - 1].goles
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudieron obtener los goles del equipo solicitado",
+        )
+
+
+@pony.db_session()
+def get_jugadores():
+    try:
+        return db.Jugador.select()
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudieron encontrar jugadores"
+        )
