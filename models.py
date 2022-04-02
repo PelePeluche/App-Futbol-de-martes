@@ -135,3 +135,13 @@ def get_jugadores():
         raise HTTPException(
             status_code=500, detail="No se pudieron encontrar jugadores"
         )
+
+
+@pony.db_session()
+def get_jugador_by_id(id_jugador):
+    try:
+        return Jugador[id_jugador]
+    except:
+        raise HTTPException(
+            status_code=500, detail="El jugador solicitado no fue encontrado"
+        )
