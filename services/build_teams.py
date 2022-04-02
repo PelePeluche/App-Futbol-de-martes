@@ -112,4 +112,4 @@ def armar_equipos_voraz(partido_id, cantidad_jugadores):
             equipo_2.append(jugador_a_agregar)
         print(jugador_a_agregar)
         jugadores_anotados.remove(jugador_a_agregar)
-    return {"Equipo 1": equipo_1, "Equipo_2": equipo_2}
+    return {"Equipo 1": equipo_1, "Equipo 2": equipo_2}
