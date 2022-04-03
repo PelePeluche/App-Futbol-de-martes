@@ -19,6 +19,7 @@ class Jugador(db.Entity, JugadorMixin):
     equipos = pony.Set("Equipo", reverse="jugadores")
     capitan_de = pony.Set("Equipo", reverse="capitan")
 
+# Función para crear un jugador
 
 def crear_jugador(nombre_jugador):
     jugador = Jugador(nombre=nombre_jugador)
@@ -49,6 +50,7 @@ class Partido(db.Entity, PartidoMixin):
     equipos = pony.Set(Equipo)
     fecha = pony.Optional(date)
 
+# Función para crear un equipo
 
 def crear_partido():
     partido = Partido()
@@ -66,16 +68,6 @@ class Cancha(db.Entity, CanchaMixin):
     direccion = pony.Optional(str)
     partidos = pony.Set(Partido)
 
-
-# Definición de clase Resultado y sus atributos
-
-"""
-class Resultado(db.Entity, ResultadoMixin):
-    id_resultado = pony.PrimaryKey(int, auto=True)
-    resultado = pony.Required(Result, unique=True)
-    equipos = pony.Set(Equipo)
-    jugadores = pony.Set(Jugador)
-"""
 
 # Line used for debugging
 pony.set_sql_debug(True)

@@ -129,19 +129,3 @@ class CanchaMixin(object):
         pony.commit()
 
 
-# Mixin para Resultado
-
-"""
-class ResultadoMixin(object):
-    def set_resultado(self, resultado):
-        self.resultado = resultado
-        pony.commit()
-
-    def add_equipo(self, equipo):
-        self.equipo.add(equipo)
-        pony.commit()
-
-    def add_jugador(self, jugador):
-        self.jugadores.add(jugador)
-        pony.commit()
-"""
