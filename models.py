@@ -1,4 +1,3 @@
-from audioop import reverse
 from fastapi import HTTPException
 import pony.orm as pony
 from datetime import date
@@ -18,6 +17,9 @@ class Jugador(db.Entity, JugadorMixin):
     partidos = pony.Set("Partido", reverse="jugadores_anotados")
     equipos = pony.Set("Equipo", reverse="jugadores")
     capitan_de = pony.Set("Equipo", reverse="capitan")
+    puntos = pony.Required(int, default=0)
+    jugados = pony.Required(int, default=0)
+    promedio = pony.Required(float, default=0)
 
 
 # Función para crear un jugador
@@ -51,15 +53,7 @@ class Partido(db.Entity, PartidoMixin):
     jugadores_anotados = pony.Set(Jugador, reverse="partidos")
     equipos = pony.Set(Equipo)
     fecha = pony.Optional(date)
-
-
-# Función para crear un equipo
-
-
-def crear_partido():
-    partido = Partido()
-    pony.commit()
-    return partido
+    jugado = pony.Required(bool, default=False)
 
 
 # Definición de clase Cancha y sus atributos
@@ -81,6 +75,24 @@ db.bind("sqlite", "database.sqlite", create_db=True)
 db.generate_mapping(create_tables=True)
 
 ## Funciones de acceso a BDD
+
+
+# Función para crear un jugador
+
+
+@pony.db_session()
+def crear_jugador(nombre_jugador):
+    jugador = Jugador(nombre=nombre_jugador)
+    return jugador
+
+
+# Función para crear un partido
+
+
+@pony.db_session()
+def crear_partido():
+    partido = Partido()
+    return partido
 
 
 # Función para obtener la lista de partidos
@@ -274,4 +286,25 @@ def quitar_jugador_de_proximo_partido(nombre_jugador: str):
     except:
         raise HTTPException(
             status_code=500, detail="No se pudo quitar al jugador del partido"
+        )
+
+
+# Función que obtiene la lista con jugadores que cumplen una mínima cantidad de partidos
+# Recibe como parámetro la cantidad mínima de partidos
+
+
+@pony.db_session()
+def get_lista_jugadores_with_min_partidos(
+    minimo_de_partidos: int, cantidad_de_jugadores: int
+):
+    try:
+        return (
+            db.Jugador.select(lambda j: len(j.resultados) >= minimo_de_partidos)
+            .sort_by(pony.desc(Jugador.promedio))
+            .limit(cantidad_de_jugadores)
+        )
+
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudieron encontrar jugadores"
         )

@@ -15,6 +15,7 @@ from models import (
     get_jugador_by_nombre,
     agregar_jugador_a_proximo_partido,
     quitar_jugador_de_proximo_partido,
+    get_lista_jugadores_with_min_partidos,
 )
 from services.build_teams import armar_equipos_voraz
 
@@ -44,6 +45,7 @@ async def listar_partidos():
                 "Goles Equipo 2": get_goles_by_partido_by_equipo(p, 1),
             }
             for p in partidos
+            if p.jugado
         ]
     except:
         raise HTTPException(
@@ -85,15 +87,18 @@ async def detalle_partido(id_partido: int):
 async def detalle_proximo_partido():
     try:
         partido = get_partido_by_id(get_id_proximo_partido())
-        return {
-            "Partido": partido.id_partido,
-            "Jugadores anotados": [
-                jugador.nombre
-                for jugador in get_lista_de_jugadores_anotados_by_partido_id(
-                    get_id_proximo_partido()
-                )
-            ],
-        }
+        if not partido.jugado:
+            return {
+                "Partido": partido.id_partido,
+                "Jugadores anotados": [
+                    jugador.nombre
+                    for jugador in get_lista_de_jugadores_anotados_by_partido_id(
+                        get_id_proximo_partido()
+                    )
+                ],
+            }
+        else:
+            print("No hay un próximo partido programado")
     except:
         raise HTTPException(
             status_code=500, detail="No se pudo acceder al partido solicitado"
@@ -165,9 +170,9 @@ async def listar_jugadores():
         return [
             {
                 "Jugador": j.nombre,
-                "Partidos jugados": j.get_jugados(),
-                "Puntos": j.get_puntos(),
-                "Promedio": j.get_promedio(),
+                "Partidos jugados": j.jugados,
+                "Puntos": j.puntos,
+                "Promedio": j.promedio,
             }
             for j in jugadores
         ]
@@ -202,9 +207,9 @@ async def detalle_jugador(nombre_jugador: str):
         jugador = get_jugador_by_nombre(nombre_jugador)
         return {
             "Jugador": jugador.nombre,
-            "Partidos jugados": jugador.get_jugados(),
-            "Puntos": jugador.get_puntos(),
-            "Promedio": jugador.get_promedio(),
+            "Partidos jugados": jugador.jugados,
+            "Puntos": jugador.puntos,
+            "Promedio": jugador.promedio,
             "Resultados": {
                 "Ganados": jugador.get_resultados()["ganados"],
                 "Empatados": jugador.get_resultados()["empatados"],
@@ -215,4 +220,30 @@ async def detalle_jugador(nombre_jugador: str):
         raise HTTPException(
             status_code=500,
             detail="No se pudo acceder a la información del jugador solicitado",
+        )
+
+
+# Función que obtiene la tabla de promedios ordenados de mayor a menor mostrando promedio de puntos, promedio de goles, partidos ganados, empatados, perdidos y cantidad de partidos
+# Recibe como parámetro la cantidad de jugadores a mostrar en la lista y el mínimo de partidos jugados
+
+
+@app.get("/tabla-promiedos")
+async def tabla_promiedos(minimo_de_partidos: int, cantidad_de_jugadores: int):
+    try:
+        tabla_jugadores = get_lista_jugadores_with_min_partidos(
+            minimo_de_partidos, cantidad_de_jugadores
+        )
+        return [
+            {
+                "Jugador": j.nombre,
+                "Promedio": j.promedio,
+                "Partidos jugados": j.jugados,
+                "Puntos": j.puntos,
+            }
+            for j in tabla_jugadores
+        ]
+        # [{"Jugador": jugador.nombre} for jugador in tabla_jugadores]
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudo acceder a la tabla de promiedos"
         )

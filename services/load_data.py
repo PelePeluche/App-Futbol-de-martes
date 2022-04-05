@@ -17,7 +17,7 @@ from datos import datos
 def carga_datos():
 
     for partido in datos:
-        p = Partido()
+        p = Partido(jugado=True)
         pony.commit()
         print(partido)
 
@@ -56,6 +56,9 @@ def carga_datos():
             e1.add_jugador(j)
             j.add_resultado(e1.resultado)
             print(p.add_jugador(j))
+            j.increase_jugados()
+            j.increase_puntos(e1.resultado)
+            j.actualize_promedio()
 
         for jugador in jugadores_2:
             try:
@@ -66,3 +69,6 @@ def carga_datos():
             e2.add_jugador(j)
             j.add_resultado(e2.resultado)
             print(p.add_jugador(j))
+            j.increase_jugados()
+            j.increase_puntos(e2.resultado)
+            j.actualize_promedio()

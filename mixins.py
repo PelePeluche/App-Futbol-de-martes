@@ -25,6 +25,18 @@ class JugadorMixin(object):
         self.capitan_de(equipo)
         pony.commit()
 
+    def increase_jugados(self):
+        self.jugados += 1
+        pony.commit()
+
+    def increase_puntos(self, puntos_to_increase):
+        self.puntos += puntos_to_increase
+        pony.commit()
+
+    def actualize_promedio(self):
+        self.promedio = self.puntos / self.jugados
+        pony.commit()
+
     def get_jugados(self):
         return len(self.resultados)
 
