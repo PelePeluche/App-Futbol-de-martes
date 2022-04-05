@@ -80,7 +80,10 @@ pony.set_sql_debug(True)
 db.bind("sqlite", "database.sqlite", create_db=True)
 db.generate_mapping(create_tables=True)
 
-# Funciones de acceso a BDD
+## Funciones de acceso a BDD
+
+
+# Función para obtener la lista de partidos
 
 
 @pony.db_session()
@@ -91,12 +94,19 @@ def get_partidos():
         raise HTTPException(status_code=500, detail="No se pudieron encontrar partidos")
 
 
+# Función para detallar un partido en particular
+# Recibe como parámetro el id del partido
+
+
 @pony.db_session()
-def get_partido_by_id(id_partido):
+def get_partido_by_id(id_partido: int):
     try:
         return Partido[id_partido]
     except:
         raise HTTPException(status_code=500, detal="No existe el partido solicitado")
+
+
+# Función que obtiene el id del próximo partido
 
 
 @pony.db_session()
@@ -109,8 +119,12 @@ def get_id_proximo_partido():
         )
 
 
+# Función que obtiene la lista de equipos de un partido en particular
+# Recibe como parámetro el objeto Partido
+
+
 @pony.db_session()
-def get_lista_de_equipos_by_partido(partido):
+def get_lista_de_equipos_by_partido(partido: Partido):
     try:
         return partido.equipos.select()[:]
     except:
@@ -120,8 +134,12 @@ def get_lista_de_equipos_by_partido(partido):
         )
 
 
+# Función que obtiene la lista de jugadores anotados para un partido
+# Recibe como parámetro el id del partido
+
+
 @pony.db_session()
-def get_lista_de_jugadores_anotados_by_partido_id(partido_id):
+def get_lista_de_jugadores_anotados_by_partido_id(partido_id: int):
     try:
         partido = get_partido_by_id(partido_id)
         return partido.jugadores_anotados.select()[:]
@@ -132,8 +150,12 @@ def get_lista_de_jugadores_anotados_by_partido_id(partido_id):
         )
 
 
+# Función que obtiene la lista de jugadores de un equipo para un partido
+# Recibe como parámetro el objeto Partido y el número de equipo dentro del partido (1 o 2)
+
+
 @pony.db_session()
-def get_lista_de_jugadores_by_partido_by_equipo(partido, equipo_numero):
+def get_lista_de_jugadores_by_partido_by_equipo(partido: Partido, equipo_numero: int):
     try:
         return get_lista_de_equipos_by_partido(partido)[
             equipo_numero - 1
@@ -145,8 +167,12 @@ def get_lista_de_jugadores_by_partido_by_equipo(partido, equipo_numero):
         )
 
 
+# Función que obtiene los goles marcados por un equipo en un partido en particular
+# Recibe como parámetro el objeto Partido y el número de equipo dentro del partido (1 o 2)
+
+
 @pony.db_session()
-def get_goles_by_partido_by_equipo(partido, equipo_numero):
+def get_goles_by_partido_by_equipo(partido: Partido, equipo_numero: int):
     try:
         return get_lista_de_equipos_by_partido(partido)[equipo_numero - 1].goles
     except:
@@ -154,6 +180,9 @@ def get_goles_by_partido_by_equipo(partido, equipo_numero):
             status_code=500,
             detail="No se pudieron obtener los goles del equipo solicitado",
         )
+
+
+# Función que devuelve la lista de jugadores
 
 
 @pony.db_session()
@@ -166,8 +195,12 @@ def get_jugadores():
         )
 
 
+# Función que devuelve un jugador en particular dado su id
+# Recibe como parámetro el id del jugador
+
+
 @pony.db_session()
-def get_jugador_by_id(id_jugador):
+def get_jugador_by_id(id_jugador: int):
     try:
         return Jugador[id_jugador]
     except:
@@ -176,8 +209,12 @@ def get_jugador_by_id(id_jugador):
         )
 
 
+# Función que devuelve un jugador en particular dado su nombre
+# Recibe como parámetro el nombre del jugador
+
+
 @pony.db_session()
-def get_jugador_by_nombre(nombre_jugador):
+def get_jugador_by_nombre(nombre_jugador: str):
     try:
         return db.Jugador.select(lambda j: j.nombre == nombre_jugador).first()
     except:
@@ -186,8 +223,12 @@ def get_jugador_by_nombre(nombre_jugador):
         )
 
 
+# Función que obtiene la lista de equipos en los que jugaron juntos dos jugadores
+# Recibe como parámetros los nombres de los dos jugadores
+
+
 @pony.db_session()
-def get_lista_equipos_juntos(nombre_jugador_1, nombre_jugador_2):
+def get_lista_equipos_juntos(nombre_jugador_1: str, nombre_jugador_2: str):
     try:
         jugador_1 = db.Jugador.select(lambda j: j.nombre == nombre_jugador_1).first()
         jugador_2 = db.Jugador.select(lambda j: j.nombre == nombre_jugador_2).first()
@@ -202,8 +243,12 @@ def get_lista_equipos_juntos(nombre_jugador_1, nombre_jugador_2):
         )
 
 
+# Función que agrega un jugador al próximo partido
+# Recibe como parámetro el nombre del jugador
+
+
 @pony.db_session()
-def agregar_jugador_a_proximo_partido(nombre_jugador):
+def agregar_jugador_a_proximo_partido(nombre_jugador: str):
     try:
         partido = get_partido_by_id(get_id_proximo_partido())
         jugador = get_jugador_by_nombre(nombre_jugador)
@@ -215,8 +260,12 @@ def agregar_jugador_a_proximo_partido(nombre_jugador):
         )
 
 
+# Función que quita a un jugador del próximo partido
+# Recibe como parámetro el nombre del jugador
+
+
 @pony.db_session()
-def quitar_jugador_de_proximo_partido(nombre_jugador):
+def quitar_jugador_de_proximo_partido(nombre_jugador: str):
     try:
         partido = get_partido_by_id(get_id_proximo_partido())
         jugador = get_jugador_by_nombre(nombre_jugador)
