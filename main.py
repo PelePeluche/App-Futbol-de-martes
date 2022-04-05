@@ -13,11 +13,16 @@ from models import (
     get_jugador_by_id,
     get_lista_de_jugadores_anotados_by_partido_id,
     get_jugador_by_nombre,
+    agregar_jugador_a_proximo_partido,
+    quitar_jugador_de_proximo_partido,
 )
 from services.build_teams import armar_equipos_voraz
 
 
 app = FastAPI()
+
+
+# Endpoint que detalla los partidos jugados
 
 
 @app.get("/partidos-jugados")
@@ -41,7 +46,14 @@ async def listar_partidos():
             for p in partidos
         ]
     except:
-        raise HTTPException(status_code=500, detail="No se pudo acceder a la lista de partidos")
+        raise HTTPException(
+            status_code=500, detail="No se pudo acceder a la lista de partidos"
+        )
+
+
+# Endpoint que detalla un partido en particular
+# Recibe como parámetro el id del partido
+
 
 @app.get("/partidos-jugados/{id_partido}")
 async def detalle_partido(id_partido: int):
@@ -61,7 +73,13 @@ async def detalle_partido(id_partido: int):
             "Goles Equipo 2": get_goles_by_partido_by_equipo(partido, 1),
         }
     except:
-        raise HTTPException(status_code=500, detail="No se pudo acceder al partido solicitado")
+        raise HTTPException(
+            status_code=500, detail="No se pudo acceder al partido solicitado"
+        )
+
+
+# Endpoint que detalla el próximo partido
+
 
 @app.get("/proximo-partido")
 async def detalle_proximo_partido():
@@ -77,7 +95,12 @@ async def detalle_proximo_partido():
             ],
         }
     except:
-        raise HTTPException(status_code=500, detail="No se pudo acceder al partido solicitado")
+        raise HTTPException(
+            status_code=500, detail="No se pudo acceder al partido solicitado"
+        )
+
+
+# Endpoint para crear el próximo partido
 
 
 @app.post("/proximo-partido")
@@ -89,24 +112,50 @@ async def crear_proximo_partido():
         raise HTTPException(status_code=500, detail="No se pudo crear el partido")
 
 
-@app.put("/proximo-partido")
-async def agregar_jugador(nombre_jugador):
+# Endpoint para agregar un jugador al próximo partido
+# Recibe como parámetro el nombre del jugador a agregar
+
+
+@app.put("/proximo-partido/agregar-jugador")
+async def agregar_jugador(nombre_jugador: str):
     try:
-        with pony.db_session():
-            partido = get_partido_by_id(get_id_proximo_partido())
-            jugador = get_jugador_by_nombre(nombre_jugador)
-            partido.add_jugador(jugador)
-            return partido
+        return agregar_jugador_a_proximo_partido(nombre_jugador)
     except:
-        raise HTTPException(status_code=500, detail="No se pudo realizar la acción requerida")
+        raise HTTPException(
+            status_code=500, detail="No se pudo realizar la acción requerida"
+        )
 
 
-@app.get("/proximo-partido/equipos")
-async def armar_equipos_voraz_proximo_partido(cantidad_jugadores):
+# Endpoint para quitar un jugador del próximo partido
+# Recibe como parámetro el nombre del jugador a quitar
+
+
+@app.put("/proximo-partido/eliminar-jugador")
+async def quitar_jugador(nombre_jugador: str):
+    try:
+        return quitar_jugador_de_proximo_partido(nombre_jugador)
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudo quitar al jugador del proximo partido"
+        )
+
+
+# Endpoint para armar los equipos del próximo partido
+# Recibe como parámetro la cantidad de jugadores de los equipos.
+# La idea es que más adelante reciba como parámetro el tipo de algoritmo a utilizar
+
+
+@app.get("/proximo-partido/arma-equipos")
+async def armar_equipos_voraz_proximo_partido(cantidad_jugadores: int):
     try:
         return armar_equipos_voraz(get_id_proximo_partido(), int(cantidad_jugadores))
     except:
-        raise HTTPException(status_code=500, detail="No se pudo realizar la acción requerida")
+        raise HTTPException(
+            status_code=500, detail="No se pudo realizar la acción requerida"
+        )
+
+
+# Endopoint que detalla la lista de jugadores
 
 
 @app.get("/jugadores")
@@ -123,20 +172,32 @@ async def listar_jugadores():
             for j in jugadores
         ]
     except:
-        raise HTTPException(status_code=500, detail="No se pudo acceder a la lista de jugadores")
+        raise HTTPException(
+            status_code=500, detail="No se pudo acceder a la lista de jugadores"
+        )
+
+
+# Endpoint para crear nuevos jugadores
+# Recibe como parámetro el nombre del jugador
 
 
 @app.post("/jugadores")
-async def crear_nuevo_jugador(nombre_jugador):
+async def crear_nuevo_jugador(nombre_jugador: str):
     try:
         jugador = crear_jugador(nombre_jugador)
         return jugador
     except:
-        raise HTTPException(status_code=500, detail="No se pudo realizar la acción requerida")
+        raise HTTPException(
+            status_code=500, detail="No se pudo realizar la acción requerida"
+        )
+
+
+# Endpoint que detalla un jugador en particular
+# Recibe como parámetro el nombre del jugador
 
 
 @app.get("/jugadores/{nombre_jugador}")
-async def detalle_jugador(nombre_jugador):
+async def detalle_jugador(nombre_jugador: str):
     try:
         jugador = get_jugador_by_nombre(nombre_jugador)
         return {
@@ -151,4 +212,7 @@ async def detalle_jugador(nombre_jugador):
             },
         }
     except:
-        raise HTTPException(status_code=500, detail="No se pudo acceder a la información del jugador solicitado")
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudo acceder a la información del jugador solicitado",
+        )

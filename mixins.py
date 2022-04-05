@@ -99,6 +99,10 @@ class PartidoMixin(object):
         self.jugadores_anotados.add(jugador)
         pony.commit()
 
+    def remove_jugador(self, jugador):
+        self.jugadores_anotados.remove(jugador)
+        pony.commit()
+
     def add_equipo(self, equipo):
         self.equipos.add(equipo)
         pony.commit()
@@ -127,5 +131,3 @@ class CanchaMixin(object):
     def add_partido(self, partido):
         self.jugadores_anotados.add(partido)
         pony.commit()
-
-

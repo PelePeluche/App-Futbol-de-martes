@@ -19,7 +19,9 @@ class Jugador(db.Entity, JugadorMixin):
     equipos = pony.Set("Equipo", reverse="jugadores")
     capitan_de = pony.Set("Equipo", reverse="capitan")
 
+
 # Función para crear un jugador
+
 
 def crear_jugador(nombre_jugador):
     jugador = Jugador(nombre=nombre_jugador)
@@ -50,7 +52,9 @@ class Partido(db.Entity, PartidoMixin):
     equipos = pony.Set(Equipo)
     fecha = pony.Optional(date)
 
+
 # Función para crear un equipo
+
 
 def crear_partido():
     partido = Partido()
@@ -195,4 +199,30 @@ def get_lista_equipos_juntos(nombre_jugador_1, nombre_jugador_2):
         raise HTTPException(
             status_code=500,
             detail="No se pudieron encontrar equipos en los que hayan jugado juntos",
+        )
+
+
+@pony.db_session()
+def agregar_jugador_a_proximo_partido(nombre_jugador):
+    try:
+        partido = get_partido_by_id(get_id_proximo_partido())
+        jugador = get_jugador_by_nombre(nombre_jugador)
+        partido.add_jugador(jugador)
+        return partido
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudo agregar el jugador al proximo partido"
+        )
+
+
+@pony.db_session()
+def quitar_jugador_de_proximo_partido(nombre_jugador):
+    try:
+        partido = get_partido_by_id(get_id_proximo_partido())
+        jugador = get_jugador_by_nombre(nombre_jugador)
+        partido.remove_jugador(jugador)
+        return partido
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudo quitar al jugador del partido"
         )
