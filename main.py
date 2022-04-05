@@ -242,7 +242,6 @@ async def tabla_promiedos(minimo_de_partidos: int, cantidad_de_jugadores: int):
             }
             for j in tabla_jugadores
         ]
-        # [{"Jugador": jugador.nombre} for jugador in tabla_jugadores]
     except:
         raise HTTPException(
             status_code=500, detail="No se pudo acceder a la tabla de promiedos"
