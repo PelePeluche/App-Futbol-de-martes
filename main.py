@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi import HTTPException
-import pony.orm as pony
+from typing import Optional
+from datetime import date
 from models import (
+    cargar_partido,
+    cargar_equipo,
     crear_partido,
     crear_jugador,
     get_id_proximo_partido,
@@ -51,6 +54,37 @@ async def listar_partidos():
         raise HTTPException(
             status_code=500, detail="No se pudo acceder a la lista de partidos"
         )
+
+
+# Endpoint que carga datos de un partido
+# Recibe como parámetro el id del partido, los jugadores de cada equipo, los goles, pecheras (Optional) y fecha (Optional)
+
+
+@app.put("/partidos-jugados")
+async def carga_partido_jugado(
+    id_partido: int,
+    jugadores_equipo_1: list,
+    goles_equipo_1: int,
+    jugadores_equipo_2: list,
+    goles_equipo_2: int,
+    nombre_cancha: Optional[str] = None,
+    fecha: Optional[date] = None,
+    pecheras_equipo_1: Optional[str] = None,
+    pecheras_equipo_2: Optional[str] = None,
+):
+    try:
+        e1 = cargar_equipo(
+            id_partido, jugadores_equipo_1, goles_equipo_1, pecheras_equipo_1
+        )
+        e2 = cargar_equipo(
+            id_partido, jugadores_equipo_2, goles_equipo_2, pecheras_equipo_2
+        )
+        partido = cargar_partido(
+            id_partido, e1.id_equipo, e2.id_equipo, nombre_cancha, fecha
+        )
+        return partido
+    except:
+        raise HTTPException(status_code=500, detail="No se pudo cargar el partido")
 
 
 # Endpoint que detalla un partido en particular
@@ -228,7 +262,9 @@ async def detalle_jugador(nombre_jugador: str):
 
 
 @app.get("/tabla-promiedos")
-async def tabla_promiedos(minimo_de_partidos: int, cantidad_de_jugadores: int):
+async def tabla_promiedos(
+    minimo_de_partidos: Optional[int] = 0, cantidad_de_jugadores: Optional[int] = None
+):
     try:
         tabla_jugadores = get_lista_jugadores_with_min_partidos(
             minimo_de_partidos, cantidad_de_jugadores

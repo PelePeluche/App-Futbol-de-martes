@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 import pony.orm as pony
+from typing import Optional
 from datetime import date
 from mixins import *
 
@@ -20,15 +21,6 @@ class Jugador(db.Entity, JugadorMixin):
     puntos = pony.Required(int, default=0)
     jugados = pony.Required(int, default=0)
     promedio = pony.Required(float, default=0)
-
-
-# Función para crear un jugador
-
-
-def crear_jugador(nombre_jugador):
-    jugador = Jugador(nombre=nombre_jugador)
-    pony.commit()
-    return jugador
 
 
 # Definición de clase Equipo y sus atributos
@@ -61,7 +53,7 @@ class Partido(db.Entity, PartidoMixin):
 
 class Cancha(db.Entity, CanchaMixin):
     id_cancha = pony.PrimaryKey(int, auto=True)
-    nombre = pony.Optional(str)
+    nombre = pony.Optional(str, unique=True)
     tamanio = pony.Optional(int)
     direccion = pony.Optional(str)
     partidos = pony.Set(Partido)
@@ -93,6 +85,15 @@ def crear_jugador(nombre_jugador):
 def crear_partido():
     partido = Partido()
     return partido
+
+
+# Función para crear un equipo
+
+
+def crear_equipo(objeto_partido):
+    equipo = Equipo(partido=objeto_partido)
+    pony.commit()
+    return equipo
 
 
 # Función para obtener la lista de partidos
@@ -221,6 +222,20 @@ def get_jugador_by_id(id_jugador: int):
         )
 
 
+# Función que devuelve un equipo en particular dado su id
+# Recibe como parámetro el id del equipo
+
+
+@pony.db_session()
+def get_equipo_by_id(id_equipo: int):
+    try:
+        return Equipo[id_equipo]
+    except:
+        raise HTTPException(
+            status_code=500, detail="El jugador solicitado no fue encontrado"
+        )
+
+
 # Función que devuelve un jugador en particular dado su nombre
 # Recibe como parámetro el nombre del jugador
 
@@ -298,13 +313,97 @@ def get_lista_jugadores_with_min_partidos(
     minimo_de_partidos: int, cantidad_de_jugadores: int
 ):
     try:
-        return (
-            db.Jugador.select(lambda j: len(j.resultados) >= minimo_de_partidos)
-            .sort_by(pony.desc(Jugador.promedio))
-            .limit(cantidad_de_jugadores)
-        )
-
+        if cantidad_de_jugadores:
+            return (
+                db.Jugador.select(lambda j: len(j.resultados) >= minimo_de_partidos)
+                .sort_by(pony.desc(Jugador.promedio))
+                .limit(cantidad_de_jugadores)
+            )
+        else:
+            return db.Jugador.select(
+                lambda j: len(j.resultados) >= minimo_de_partidos
+            ).sort_by(pony.desc(Jugador.promedio))
     except:
         raise HTTPException(
             status_code=500, detail="No se pudieron encontrar jugadores"
+        )
+
+
+# Función que carga un equipo a la base de datos
+# Recibe como parámetros el id del partido en el cual jugó el equipo, una lista con los nombres de los jugadores, los goles del equipo y la pechera que usó (Optional)
+
+
+@pony.db_session()
+def cargar_equipo(
+    id_partido: int,
+    jugadores_equipo: list,
+    goles_equipo: int,
+    pecheras_equipo: Optional[str] = None,
+):
+    try:
+        equipo = crear_equipo(get_partido_by_id(id_partido))
+        equipo.add_jugadores(
+            get_jugador_by_nombre(jugador) for jugador in jugadores_equipo
+        )
+        equipo.set_goles(goles_equipo)
+        equipo.set_capitan(get_jugador_by_nombre(jugadores_equipo[0]))
+        if pecheras_equipo:
+            equipo.set_pechera(pecheras_equipo)
+        return equipo
+    except:
+        raise HTTPException(status_code=500, detail="No se pudo crear el equipo")
+
+
+# Función que devuelve el objeto Cancha dado su nombre
+# Recibe como parámetro el nombre de la cancha
+
+
+@pony.db_session()
+def get_cancha_by_nombre(nombre_cancha: str):
+    try:
+        return db.Cancha.select(lambda c: c.nombre == nombre_cancha).first()
+    except:
+        raise HTTPException(
+            status_code=500, detail="La cancha solicitado no fue encontrado"
+        )
+
+
+# Función que carga un partido jugado partido
+# Recibe como parámetros el id del partido, los equipos que jugaron, el nombre de la cancha (Optional) y la fecha (Optional)
+
+
+@pony.db_session()
+def cargar_partido(
+    id_partido: int,
+    id_equipo_1: Equipo,
+    id_equipo_2: Equipo,
+    nombre_cancha: Optional[str] = None,
+    fecha: Optional[date] = None,
+):
+    try:
+        partido = get_partido_by_id(id_partido)
+        partido.set_jugado()
+        e1 = get_equipo_by_id(id_equipo_1)
+        e2 = get_equipo_by_id(id_equipo_2)
+        partido.add_equipo(e1)
+        partido.add_equipo(e2)
+
+        if e1.goles > e2.goles:
+            e1.set_resultado(3)
+            e2.set_resultado(0)
+        elif e1.goles < e2.goles:
+            e1.set_resultado(0)
+            e2.set_resultado(3)
+        else:
+            e1.set_resultado(1)
+            e2.set_resultado(1)
+
+        if nombre_cancha:
+            partido.set_cancha(get_cancha_by_nombre(nombre_cancha))
+        if fecha:
+            partido.set_fecha(fecha)
+        return partido
+    except:
+        raise HTTPException(
+            status_code=500, detail="No se pudo cargar el partido (función)"
         )

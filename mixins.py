@@ -90,6 +90,11 @@ class EquipoMixin(object):
         self.jugadores.add(jugador)
         pony.commit()
 
+    def add_jugadores(self, jugadores):
+        for jugador in jugadores:
+            self.jugadores.add(jugador)
+        pony.commit()
+
     def set_capitan(self, jugador):
         self.capitan = jugador
         pony.commit()
@@ -111,6 +116,11 @@ class PartidoMixin(object):
         self.jugadores_anotados.add(jugador)
         pony.commit()
 
+    def add_jugadores(self, jugadores):
+        for jugador in jugadores:
+            self.jugadores_anotados.add(jugador)
+        pony.commit()
+
     def remove_jugador(self, jugador):
         self.jugadores_anotados.remove(jugador)
         pony.commit()
@@ -121,6 +131,10 @@ class PartidoMixin(object):
 
     def set_fecha(self, fecha):
         self.fecha = fecha
+        pony.commit()
+
+    def set_jugado(self):
+        self.jugado = True
         pony.commit()
 
 
