@@ -115,6 +115,42 @@ datos = {
             "goles": 5,
         },
     },
+    "Partido 7": {
+        "Equipo 1": {
+            "jugadores": {
+                "Bigornia",
+                "Pini",
+                "Fede",
+                "Gonza",
+                "GonZi",
+                "Pepe",
+                "Monti",
+            },
+            "goles": 2,
+        },
+        "Equipo 2": {
+            "jugadores": {
+                "Kechi",
+                "Cabeza",
+                "Pelado",
+                "Pera",
+                "Leo",
+                "Yayeta",
+                "Santi",
+            },
+            "goles": 4,
+        },
+    },
+    "Partido 8": {
+        "Equipo 1": {
+            "jugadores": {"Bigornia", "Cabeza", "Pera", "Fede", "Tavo", "Yayeta"},
+            "goles": 3,
+        },
+        "Equipo 2": {
+            "jugadores": {"Gonza", "GonZi", "Pini", "Leo", "Negro", "Monti"},
+            "goles": 4,
+        },
+    },
 }
 
 """
