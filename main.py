@@ -54,11 +54,48 @@ async def listar_partidos():
         raise error
 
 
+# Endpoint que detalla un partido en particular
+# Recibe como parámetro el id del partido
+
+
+@app.get("/partidos/{id_partido}")
+async def detalle_partido(id_partido: int):
+    try:
+        partido = get_partido_by_id(id_partido)
+        if partido.jugado:
+            return {
+                "Partido": partido.id_partido,
+                "Equipo 1": [
+                    jugador.nombre
+                    for jugador in get_lista_de_jugadores_by_partido_by_equipo(partido, 0)
+                ],
+                "Goles Equipo 1": get_goles_by_partido_by_equipo(partido, 0),
+                "Equipo 2": [
+                    jugador.nombre
+                    for jugador in get_lista_de_jugadores_by_partido_by_equipo(partido, 1)
+                ],
+                "Goles Equipo 2": get_goles_by_partido_by_equipo(partido, 1),
+            }
+        else:
+             return {
+                "Partido": partido.id_partido,
+                "Jugadores anotados": [
+                    jugador.nombre
+                    for jugador in get_lista_de_jugadores_anotados_by_partido_id(
+                        get_id_proximo_partido()
+                    )
+                ],
+            }
+            
+    except Exception as error:
+        raise error
+
+
 # Endpoint que carga datos de un partido
 # Recibe como parámetro el id del partido, los jugadores de cada equipo, los goles, pecheras (Optional) y fecha (Optional)
 
 
-@app.put("/partidos")
+@app.put("/partidos/{id_partido}")
 async def carga_partido_jugado(
     id_partido: int,
     jugadores_equipo_1: list,
@@ -85,34 +122,10 @@ async def carga_partido_jugado(
         raise error
 
 
-# Endpoint que detalla un partido en particular
-# Recibe como parámetro el id del partido
-
-
-@app.get("/partidos/{id_partido}")
-async def detalle_partido(id_partido: int):
-    try:
-        partido = get_partido_by_id(id_partido)
-        return {
-            "Partido": partido.id_partido,
-            "Equipo 1": [
-                jugador.nombre
-                for jugador in get_lista_de_jugadores_by_partido_by_equipo(partido, 0)
-            ],
-            "Goles Equipo 1": get_goles_by_partido_by_equipo(partido, 0),
-            "Equipo 2": [
-                jugador.nombre
-                for jugador in get_lista_de_jugadores_by_partido_by_equipo(partido, 1)
-            ],
-            "Goles Equipo 2": get_goles_by_partido_by_equipo(partido, 1),
-        }
-    except Exception as error:
-        raise error
-
-
 # Endpoint que detalla el próximo partido
 
-
+# No voy a usar este endpoint pero lo dejo un tiempo por si las dudas
+"""
 @app.get("/proximo-partido")
 async def detalle_proximo_partido():
     try:
@@ -131,7 +144,7 @@ async def detalle_proximo_partido():
             print("No hay un próximo partido programado")
     except Exception as error:
         raise error
-
+"""
 
 # Endpoint para crear el próximo partido
 
