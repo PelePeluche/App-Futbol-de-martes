@@ -74,8 +74,11 @@ db.generate_mapping(create_tables=True)
 
 @pony.db_session()
 def crear_jugador(nombre_jugador):
-    jugador = Jugador(nombre=nombre_jugador)
-    return jugador
+    try:
+        jugador = Jugador(nombre=nombre_jugador)
+        return jugador
+    except Exception as error:
+        raise error
 
 
 # Función para crear un partido
@@ -83,17 +86,21 @@ def crear_jugador(nombre_jugador):
 
 @pony.db_session()
 def crear_partido():
-    partido = Partido()
-    return partido
-
+    try:
+        partido = Partido()
+        return partido
+    except Exception as error:
+        raise error
 
 # Función para crear un equipo
 
-
+@pony.db_session()
 def crear_equipo(objeto_partido):
-    equipo = Equipo(partido=objeto_partido)
-    pony.commit()
-    return equipo
+    try:
+        equipo = Equipo(partido=objeto_partido)
+        return equipo
+    except Exception as error:
+        raise error
 
 
 # Función para obtener la lista de partidos
@@ -103,8 +110,8 @@ def crear_equipo(objeto_partido):
 def get_partidos():
     try:
         return db.Partido.select()
-    except:
-        raise HTTPException(status_code=500, detail="No se pudieron encontrar partidos")
+    except Exception as error:
+        raise error
 
 
 # Función para detallar un partido en particular
@@ -115,8 +122,8 @@ def get_partidos():
 def get_partido_by_id(id_partido: int):
     try:
         return Partido[id_partido]
-    except:
-        raise HTTPException(status_code=500, detal="No existe el partido solicitado")
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene el id del próximo partido
@@ -126,10 +133,8 @@ def get_partido_by_id(id_partido: int):
 def get_id_proximo_partido():
     try:
         return len(db.Partido.select())
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo obtener el id del proximo partido"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene la lista de equipos de un partido en particular
@@ -140,11 +145,8 @@ def get_id_proximo_partido():
 def get_lista_de_equipos_by_partido(partido: Partido):
     try:
         return partido.equipos.select()[:]
-    except:
-        raise HTTPException(
-            status_code=500,
-            detail="No se pudieron obtener los equipos del partido solicitado",
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene la lista de jugadores anotados para un partido
@@ -156,11 +158,8 @@ def get_lista_de_jugadores_anotados_by_partido_id(partido_id: int):
     try:
         partido = get_partido_by_id(partido_id)
         return partido.jugadores_anotados.select()[:]
-    except:
-        raise HTTPException(
-            status_code=500,
-            detail="No se pudieron obtener los jugadores anotados del partido solicitado",
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene la lista de jugadores de un equipo para un partido
@@ -173,11 +172,8 @@ def get_lista_de_jugadores_by_partido_by_equipo(partido: Partido, equipo_numero:
         return get_lista_de_equipos_by_partido(partido)[
             equipo_numero - 1
         ].jugadores.select()
-    except:
-        raise HTTPException(
-            status_code=500,
-            detail="No se pudieron obtener los jugadores del equipo solicitado",
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene los goles marcados por un equipo en un partido en particular
@@ -188,11 +184,8 @@ def get_lista_de_jugadores_by_partido_by_equipo(partido: Partido, equipo_numero:
 def get_goles_by_partido_by_equipo(partido: Partido, equipo_numero: int):
     try:
         return get_lista_de_equipos_by_partido(partido)[equipo_numero - 1].goles
-    except:
-        raise HTTPException(
-            status_code=500,
-            detail="No se pudieron obtener los goles del equipo solicitado",
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que devuelve la lista de jugadores
@@ -202,10 +195,8 @@ def get_goles_by_partido_by_equipo(partido: Partido, equipo_numero: int):
 def get_jugadores():
     try:
         return db.Jugador.select()
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudieron encontrar jugadores"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que devuelve un jugador en particular dado su id
@@ -216,10 +207,8 @@ def get_jugadores():
 def get_jugador_by_id(id_jugador: int):
     try:
         return Jugador[id_jugador]
-    except:
-        raise HTTPException(
-            status_code=500, detail="El jugador solicitado no fue encontrado"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que devuelve un equipo en particular dado su id
@@ -230,10 +219,8 @@ def get_jugador_by_id(id_jugador: int):
 def get_equipo_by_id(id_equipo: int):
     try:
         return Equipo[id_equipo]
-    except:
-        raise HTTPException(
-            status_code=500, detail="El jugador solicitado no fue encontrado"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que devuelve un jugador en particular dado su nombre
@@ -244,10 +231,8 @@ def get_equipo_by_id(id_equipo: int):
 def get_jugador_by_nombre(nombre_jugador: str):
     try:
         return db.Jugador.select(lambda j: j.nombre == nombre_jugador).first()
-    except:
-        raise HTTPException(
-            status_code=500, detail="El jugador solicitado no fue encontrado"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene la lista de equipos en los que jugaron juntos dos jugadores
@@ -263,11 +248,8 @@ def get_lista_equipos_juntos(nombre_jugador_1: str, nombre_jugador_2: str):
             lambda e: jugador_1 in e.jugadores and jugador_2 in e.jugadores
         )[:]
         return equipos_juntos
-    except:
-        raise HTTPException(
-            status_code=500,
-            detail="No se pudieron encontrar equipos en los que hayan jugado juntos",
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que agrega un jugador al próximo partido
@@ -281,10 +263,8 @@ def agregar_jugador_a_proximo_partido(nombre_jugador: str):
         jugador = get_jugador_by_nombre(nombre_jugador)
         partido.add_jugador(jugador)
         return partido
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo agregar el jugador al proximo partido"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que quita a un jugador del próximo partido
@@ -298,10 +278,8 @@ def quitar_jugador_de_proximo_partido(nombre_jugador: str):
         jugador = get_jugador_by_nombre(nombre_jugador)
         partido.remove_jugador(jugador)
         return partido
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo quitar al jugador del partido"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene la lista con jugadores que cumplen una mínima cantidad de partidos
@@ -323,10 +301,8 @@ def get_lista_jugadores_with_min_partidos(
             return db.Jugador.select(
                 lambda j: len(j.resultados) >= minimo_de_partidos
             ).sort_by(pony.desc(Jugador.promedio))
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudieron encontrar jugadores"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que carga un equipo a la base de datos
@@ -350,8 +326,8 @@ def cargar_equipo(
         if pecheras_equipo:
             equipo.set_pechera(pecheras_equipo)
         return equipo
-    except:
-        raise HTTPException(status_code=500, detail="No se pudo crear el equipo")
+    except Exception as error:
+        raise error
 
 
 # Función que devuelve el objeto Cancha dado su nombre
@@ -362,10 +338,8 @@ def cargar_equipo(
 def get_cancha_by_nombre(nombre_cancha: str):
     try:
         return db.Cancha.select(lambda c: c.nombre == nombre_cancha).first()
-    except:
-        raise HTTPException(
-            status_code=500, detail="La cancha solicitado no fue encontrado"
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que carga un partido jugado partido
@@ -402,8 +376,7 @@ def cargar_partido(
             partido.set_cancha(get_cancha_by_nombre(nombre_cancha))
         if fecha:
             partido.set_fecha(fecha)
+            
         return partido
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo cargar el partido (función)"
-        )
+    except Exception as error:
+        raise error

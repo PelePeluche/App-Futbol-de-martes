@@ -29,7 +29,7 @@ app = FastAPI()
 # Endpoint que detalla los partidos jugados
 
 
-@app.get("/partidos-jugados")
+@app.get("/partidos")
 async def listar_partidos():
     try:
         partidos = get_partidos()
@@ -50,17 +50,15 @@ async def listar_partidos():
             for p in partidos
             if p.jugado
         ]
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo acceder a la lista de partidos"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint que carga datos de un partido
 # Recibe como parámetro el id del partido, los jugadores de cada equipo, los goles, pecheras (Optional) y fecha (Optional)
 
 
-@app.put("/partidos-jugados")
+@app.put("/partidos")
 async def carga_partido_jugado(
     id_partido: int,
     jugadores_equipo_1: list,
@@ -83,15 +81,15 @@ async def carga_partido_jugado(
             id_partido, e1.id_equipo, e2.id_equipo, nombre_cancha, fecha
         )
         return partido
-    except:
-        raise HTTPException(status_code=500, detail="No se pudo cargar el partido")
+    except Exception as error:
+        raise error
 
 
 # Endpoint que detalla un partido en particular
 # Recibe como parámetro el id del partido
 
 
-@app.get("/partidos-jugados/{id_partido}")
+@app.get("/partidos/{id_partido}")
 async def detalle_partido(id_partido: int):
     try:
         partido = get_partido_by_id(id_partido)
@@ -108,10 +106,8 @@ async def detalle_partido(id_partido: int):
             ],
             "Goles Equipo 2": get_goles_by_partido_by_equipo(partido, 1),
         }
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo acceder al partido solicitado"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint que detalla el próximo partido
@@ -133,10 +129,8 @@ async def detalle_proximo_partido():
             }
         else:
             print("No hay un próximo partido programado")
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo acceder al partido solicitado"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint para crear el próximo partido
@@ -147,8 +141,8 @@ async def crear_proximo_partido():
     try:
         partido = crear_partido()
         return partido
-    except:
-        raise HTTPException(status_code=500, detail="No se pudo crear el partido")
+    except Exception as error:
+        raise error
 
 
 # Endpoint para agregar un jugador al próximo partido
@@ -159,10 +153,8 @@ async def crear_proximo_partido():
 async def agregar_jugador(nombre_jugador: str):
     try:
         return agregar_jugador_a_proximo_partido(nombre_jugador)
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo realizar la acción requerida"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint para quitar un jugador del próximo partido
@@ -173,10 +165,8 @@ async def agregar_jugador(nombre_jugador: str):
 async def quitar_jugador(nombre_jugador: str):
     try:
         return quitar_jugador_de_proximo_partido(nombre_jugador)
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo quitar al jugador del proximo partido"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint para armar los equipos del próximo partido
@@ -188,10 +178,8 @@ async def quitar_jugador(nombre_jugador: str):
 async def armar_equipos_voraz_proximo_partido(cantidad_jugadores: int):
     try:
         return armar_equipos_voraz(get_id_proximo_partido(), int(cantidad_jugadores))
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo realizar la acción requerida"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endopoint que detalla la lista de jugadores
@@ -210,10 +198,8 @@ async def listar_jugadores():
             }
             for j in jugadores
         ]
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo acceder a la lista de jugadores"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint para crear nuevos jugadores
@@ -225,10 +211,8 @@ async def crear_nuevo_jugador(nombre_jugador: str):
     try:
         jugador = crear_jugador(nombre_jugador)
         return jugador
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo realizar la acción requerida"
-        )
+    except Exception as error:
+        raise error
 
 
 # Endpoint que detalla un jugador en particular
@@ -250,11 +234,8 @@ async def detalle_jugador(nombre_jugador: str):
                 "Perdidos": jugador.get_resultados()["perdidos"],
             },
         }
-    except:
-        raise HTTPException(
-            status_code=500,
-            detail="No se pudo acceder a la información del jugador solicitado",
-        )
+    except Exception as error:
+        raise error
 
 
 # Función que obtiene la tabla de promedios ordenados de mayor a menor mostrando promedio de puntos, promedio de goles, partidos ganados, empatados, perdidos y cantidad de partidos
@@ -278,7 +259,5 @@ async def tabla_promiedos(
             }
             for j in tabla_jugadores
         ]
-    except:
-        raise HTTPException(
-            status_code=500, detail="No se pudo acceder a la tabla de promiedos"
-        )
+    except Exception as error:
+        raise error
